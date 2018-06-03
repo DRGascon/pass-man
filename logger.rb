@@ -1,22 +1,15 @@
 #!/usr/bin/env ruby
 
 require 'logger'
+require 'singleton'
 
-logger = Logger.new('sys.log','daily')
-
-logger.level = Logger::INFO
-
-logger.info('pass-man') { "Logger created" }
-
-path = "a_non_existent_file"
-
-begin
-    File.foreach(path) do |line|
-        unless line =~ /^(\w+) = (.*)$/
-            logger.error("Line in wrong format: #{line.chomp}")
-        end
+class PassLogger
+    include Singleton
+    attr_accessor :logger
+    def self._load(str)
+        instance.logger = Logger.new('sys.log','daily')
+        instance.logger.level = Logger::INFO
+        instance.logger.info('pass-man') { "Logger created" }
     end
-rescue => err
-    logger.fatal("Caugh exception; exiting")
-    logger.fatal(err)
+
 end
