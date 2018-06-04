@@ -13,7 +13,7 @@ require './utils/logging'
 ################################################################################
 class EncPassword
     # Let anyone read the encrypted password
-    attr_reader :encrypted_password, :tag_password
+    attr_reader :encrypted_password, :tag_password, :iv
 
     ############################################################################
     # initialize method
@@ -36,14 +36,15 @@ class EncPassword
         # Take 256 bits of the KDF return
         cipher.key = password_key
         # Always use a random IV
-        cipher.iv = cipher.random_iv
+        @iv = cipher.random_iv
+        cipher.iv = @iv
         # Our AEAD is Website + user_id
         cipher.auth_data = entry[:website] + entry[:user_id].to_s
         # Do the encryption
         @encrypted_password = cipher.update(entry[:pass]) + cipher.final
         # Get the auth tag
-        @auth_tag = cipher.auth_tag
-        Logging.logger.info "Encrypted password for " + entry[:user_id].to_s + " site " + entry[:website] + " auth_tag " + @auth_tag.unpack('H*').first
+        @tag_password = cipher.auth_tag
+        Logging.logger.info "Encrypted password for " + entry[:user_id].to_s + " site " + entry[:website] + " tag_password " + @tag_password.unpack('H*').first
     end
 
 end
