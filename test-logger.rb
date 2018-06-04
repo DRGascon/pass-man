@@ -1,4 +1,4 @@
-require './logging'
+require './utils/logging'
 
 class LoggerTest
 
