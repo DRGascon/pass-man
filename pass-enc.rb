@@ -13,7 +13,7 @@ require './utils/logging'
 ################################################################################
 class EncPassword
     # Let anyone read the encrypted password
-    attr_reader :encrypted_password
+    attr_reader :encrypted_password, :tag_password
 
     ############################################################################
     # initialize method
@@ -28,7 +28,22 @@ class EncPassword
         # Log what we're doing
         Logging.logger.info "Encrypting password for " + entry[:user_id].to_s + " site " + entry[:website]
         # First create our key through PBKDF2
-        password_key = OpenSSL::PKCS5.pbkdf2_hmac_sha1(entry[:website], entry[:user_id].to_s, 1000, 24)
+        password_key = OpenSSL::PKCS5.pbkdf2_hmac_sha1(entry[:website], entry[:user_id].to_s, 1000, 32)
+        # Now lets encrypt the password using GCM
+        cipher = OpenSSL::Cipher::AES.new(256, :GCM)
+        # Use encrypt mode
+        cipher.encrypt
+        # Take 256 bits of the KDF return
+        cipher.key = password_key
+        # Always use a random IV
+        cipher.iv = cipher.random_iv
+        # Our AEAD is Website + user_id
+        cipher.auth_data = entry[:website] + entry[:user_id].to_s
+        # Do the encryption
+        @encrypted_password = cipher.update(entry[:pass]) + cipher.final
+        # Get the auth tag
+        @auth_tag = cipher.auth_tag
+        Logging.logger.info "Encrypted password for " + entry[:user_id].to_s + " site " + entry[:website] + " auth_tag " + @auth_tag.unpack('H*').first
     end
 
 end
