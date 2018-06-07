@@ -27,8 +27,10 @@ class EncPassword
     def initialize(entry)
         # Log what we're doing
         Logging.logger.info "Encrypting password for " + entry[:user_id].to_s + " site " + entry[:website]
-        # First create our key through PBKDF2
-        password_key = OpenSSL::PKCS5.pbkdf2_hmac_sha1(entry[:website], entry[:user_id].to_s, 1000, 32)
+        # Use SHA-512
+        digest = OpenSSL::Digest::SHA512.new
+        # First create our key through PBKDF2, need to get a real password here not just website
+        password_key = OpenSSL::PKCS5.pbkdf2_hmac(entry[:website], entry[:user_id].to_s, 10000, 32, digest)
         # Now lets encrypt the password using GCM
         cipher = OpenSSL::Cipher::AES.new(256, :GCM)
         # Use encrypt mode
