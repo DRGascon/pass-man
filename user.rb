@@ -10,7 +10,7 @@ require 'openssl'
 ################################################################################
 class User
     attr_accessor :name, :id
-    attr_reader :secret
+    attr_reader :secret, :unlocked
     ############################################################################
     # Initialize a new user
     #
@@ -18,12 +18,12 @@ class User
     # id - the user id
     # secret - the user's secret
     ############################################################################
-    def initialize(name, id, secret, iv)
+    def initialize(name, id, secret)
         @name = name
         @id = id
         @secret = secret
-        @iv = iv
-        Logging.logger.info "Initialized new user " + user + " id " + id
+        @unlocked = false
+        Logging.logger.info "Initialized new user " + name + " id " + id.to_s
     end
 
     ############################################################################
@@ -32,14 +32,17 @@ class User
     def unlock(password)
         Logging.logger.info "Trying to unlock user " + user
         digest = OpenSSL::Digest::SHA512.new
-        # First generate the key
+        # First generate the key based on the password
         secret-key = OpenSSL::PKCS5.pbkdf2_hmac(password, id.to_s, 20000, 32, digest)
-        # Now lets decrypt
+        # Is this our expected secret?
+        @unlocked = Utils.equal_time_compare(secret-key, password)
+        Logging.logger.info "Unlock attemp for " + user + " result " + @unlocked
     end
 
     ############################################################################
     # Lock the user's secret with a password
     ############################################################################
     def lock(password)
+        @unlocked = false
     end
 end
