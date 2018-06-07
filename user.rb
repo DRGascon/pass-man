@@ -1,4 +1,5 @@
 require './utils/logging'
+require './utils/compare'
 require 'openssl'
 
 ################################################################################
@@ -30,13 +31,13 @@ class User
     # Unlock the user's secret based on a password
     ############################################################################
     def unlock(password)
-        Logging.logger.info "Trying to unlock user " + user
+        Logging.logger.info "Trying to unlock user " + @name
         digest = OpenSSL::Digest::SHA512.new
         # First generate the key based on the password
-        secret-key = OpenSSL::PKCS5.pbkdf2_hmac(password, id.to_s, 20000, 32, digest)
+        secret_key = OpenSSL::PKCS5.pbkdf2_hmac(password, @id.to_s, 20000, 32, digest)
         # Is this our expected secret?
-        @unlocked = Utils.equal_time_compare(secret-key, password)
-        Logging.logger.info "Unlock attemp for " + user + " result " + @unlocked
+        @unlocked = Utils.equal_time_compare(secret_key, @secret)
+        Logging.logger.info "Unlock attempt for " + @name + " result " + @unlocked.to_s
     end
 
     ############################################################################
