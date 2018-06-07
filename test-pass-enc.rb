@@ -5,8 +5,8 @@ require './pass-dec.rb'
 entry = { :website => "www.google.ca", :pass => "password1234", :user_id => 5000 }
 entry1 = { :website => "www.google.ca", :pass => "another_password", :user_id => 5000 }
 
-encPass = EncPassword.new entry
-encPass1 = EncPassword.new entry1
+encPass = EncPassword.new entry, "password_test"
+encPass1 = EncPassword.new entry1, "password_test"
 
 # Now lets try to decrypt
 
@@ -18,8 +18,8 @@ entry1[:iv] = encPass1.iv
 entry1[:pass] = encPass1.encrypted_password
 entry1[:tag] = encPass1.tag_password
 
-decPass = DecPassword.new entry
-decPass1 = DecPassword.new entry1
+decPass = DecPassword.new entry, "password_test"
+decPass1 = DecPassword.new entry1, "password_test"
 
 
 print "Decrypted password" + decPass.decrypted_password + "\n"

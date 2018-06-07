@@ -22,13 +22,13 @@ class DecPassword
     #    password: The encrypted password to decrypt
     #    iv: The IV to decrypt with
     ############################################################################
-    def initialize(entry)
+    def initialize(entry, password)
         # Log what we're doing
         Logging.logger.info "Decrypting password for " + entry[:user_id].to_s + " site " + entry[:website]
         # Use SHA-512
         digest = OpenSSL::Digest::SHA512.new
         # First create our key through PBKDF2
-        password_key = OpenSSL::PKCS5.pbkdf2_hmac(entry[:website], entry[:user_id].to_s, 10000, 32, digest)
+        password_key = OpenSSL::PKCS5.pbkdf2_hmac(password, entry[:user_id].to_s + entry[:website].to_s, 10000, 32, digest)
         # Now lets encrypt the password using GCM
         cipher = OpenSSL::Cipher::AES.new(256, :GCM)
         # Use decrypt mode
