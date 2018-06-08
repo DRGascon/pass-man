@@ -31,7 +31,7 @@ class EncPassword
         # Use SHA-512
         digest = OpenSSL::Digest::SHA512.new
         # First create our key through PBKDF2
-	password_key = Utils.make_entry_key(password, entry)
+        password_key = Utils.make_entry_key(password, entry)
         # Now lets encrypt the password using GCM
         cipher = OpenSSL::Cipher::AES.new(256, :GCM)
         # Use encrypt mode
@@ -44,10 +44,17 @@ class EncPassword
         # Our AEAD is Website + user_id
         cipher.auth_data = entry[:website] + entry[:user_id].to_s
         # Do the encryption
-        @encrypted_password = cipher.update(entry[:pass]) + cipher.final
-        # Get the auth tag
-        @tag_password = cipher.auth_tag
-        Logging.logger.info "Encrypted password for " + entry[:user_id].to_s + " site " + entry[:website] + " tag_password " + @tag_password.unpack('H*').first
+        begin
+            @encrypted_password = cipher.update(entry[:pass]) + cipher.final
+        rescue OpenSSL::Cipher::CipherError
+            Logging.logger.error "Failed to encrypt password for " + entry[:user_id].to_s + " site " + entry[:website]
+            @encrypted_password = nil
+        end
+        if !@encrypted_password.nil?
+            # Get the auth tag
+            @tag_password = cipher.auth_tag
+            Logging.logger.info "Encrypted password for " + entry[:user_id].to_s + " site " + entry[:website] + " tag_password " + @tag_password.unpack('H*').first
+        end
     end
 
 end

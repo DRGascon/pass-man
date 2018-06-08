@@ -26,7 +26,7 @@ class DecPassword
         # Log what we're doing
         Logging.logger.info "Decrypting password for " + entry[:user_id].to_s + " site " + entry[:website]
         # First create our key through PBKDF2
-	password_key = Utils.make_entry_key(password, entry)
+        password_key = Utils.make_entry_key(password, entry)
         # Now lets encrypt the password using GCM
         cipher = OpenSSL::Cipher::AES.new(256, :GCM)
         # Use decrypt mode
@@ -39,7 +39,14 @@ class DecPassword
         cipher.auth_data = entry[:website] + entry[:user_id].to_s
         cipher.auth_tag = entry[:tag]
         # Do the decryption
-        @decrypted_password = cipher.update(entry[:pass]) + cipher.final
-        Logging.logger.info "Decrypted password for " + entry[:user_id].to_s + " site " + entry[:website]
+        begin
+            @decrypted_password = cipher.update(entry[:pass]) + cipher.final
+        rescue OpenSSL::Cipher::CipherError
+            Logging.logger.info "Failed to decrypt password for " + entry[:user_id].to_s + " site " + entry[:website]
+            @decrypted_password = nil
+        end
+        if !@decrypted_password.nil?
+            Logging.logger.info "Decrypted password for " + entry[:user_id].to_s + " site " + entry[:website]
+        end
     end
 end

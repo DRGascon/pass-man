@@ -16,11 +16,12 @@ entry[:tag] = encPass.tag_password
 
 entry1[:iv] = encPass1.iv
 entry1[:pass] = encPass1.encrypted_password
-entry1[:tag] = encPass1.tag_password
+entry1[:tag] = "test" 
 
 decPass = DecPassword.new entry, "password_test"
 decPass1 = DecPassword.new entry1, "password_test"
 
+passPrint = Proc.new { | pass| !pass.nil? ? (print "Decrypted password " + pass + "\n") : (print "Decryption failure\n") }
 
-print "Decrypted password" + decPass.decrypted_password + "\n"
-print "Decrypted password " + decPass1.decrypted_password + "\n"
+passPrint.call decPass.decrypted_password
+passPrint.call decPass1.decrypted_password
