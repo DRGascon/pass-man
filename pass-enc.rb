@@ -1,6 +1,7 @@
 # Include whatever modules we'll be using
 require 'openssl'
 require './utils/logging'
+require './utils/key_gen'
 
 ################################################################################
 # EncPassword class
@@ -29,8 +30,8 @@ class EncPassword
         Logging.logger.info "Encrypting password for " + entry[:user_id].to_s + " site " + entry[:website]
         # Use SHA-512
         digest = OpenSSL::Digest::SHA512.new
-        # First create our key through PBKDF2, need to get a real password here not just website
-        password_key = OpenSSL::PKCS5.pbkdf2_hmac(password, entry[:user_id].to_s + entry[:website].to_s, 10000, 32, digest)
+        # First create our key through PBKDF2
+	password_key = Utils.make_entry_key(password, entry)
         # Now lets encrypt the password using GCM
         cipher = OpenSSL::Cipher::AES.new(256, :GCM)
         # Use encrypt mode
