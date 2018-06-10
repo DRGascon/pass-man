@@ -8,7 +8,7 @@ require './utils/key_gen'
 class PasswordEntry
 
     attr_accessor :site_name, :user_name
-    attr_reader :password, :encrypted_password, :auth_tag, :iv
+    attr_reader :password, :encrypted_password, :auth_tag, :iv, :decrypted_password
 
     ############################################################################
     # Initialize the entry
@@ -23,8 +23,8 @@ class PasswordEntry
     # Unlock a password with the secret it was locked with
     ############################################################################
     def unlock_password(secret, user)
-        Logger.logger.info "Trying to unlock website " + @site_name + " user name " + @user_name + " for user " + user.name
-        password_key = make_entry_key(secret, @site_name, @user_name)
+        Logging.logger.info "Trying to unlock website " + @site_name + " user name " + @user_name + " for user " + user.name
+        password_key = Utils.make_entry_key(secret, @site_name, @user_name)
         # Now decrypt the password
         cipher = OpenSSL::Cipher::AES.new(256, :GCM)
         cipher.decrypt
@@ -34,15 +34,15 @@ class PasswordEntry
         cipher.auth_data = user.name + user.id.to_s
 
         begin
-            decrypted_password = cipher.update(@encrypted_password) + cipher.final
+            @decrypted_password = cipher.update(@encrypted_password) + cipher.final
         rescue OpenSSL::Cipher::CipherError
             Logging.logger.error "Failed to unlock website " + @site_name + " user name " + @user_name
-            decrypted_password = nil
+            @decrypted_password = nil
         end
         if !@decrypted_password.nil?
             Logging.logger.info "Unlocked website " + @site_name + " user name " + @user_name
         end
-        @password = @decrypted_password
+        @decrypted_password
     end
 
     ############################################################################
