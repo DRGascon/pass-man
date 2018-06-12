@@ -21,7 +21,7 @@ class TC_PasswordEntry < MiniTest::Test
         new_user = User.new "master_user", 1234, "some secret here"
         assert new_entry.iv.nil?
         assert new_entry.auth_tag.nil?
-        new_entry.lock_password(new_user.secret, new_user, "password1234")
+        new_entry.lock_password(new_user, "password1234")
 
         assert !new_entry.encrypted_password.nil?
         assert !new_entry.auth_tag.nil?
@@ -37,9 +37,9 @@ class TC_PasswordEntry < MiniTest::Test
         new_entry = PasswordEntry.new "www.google.ca", "test_user"
         new_user = User.new "master_user", 1234, "some secret here"
 
-        new_entry.lock_password(new_user.secret, new_user, "password1234")
+        new_entry.lock_password(new_user, "password1234")
 
-        new_entry.unlock_password(new_user.secret, new_user)
+        new_entry.unlock_password(new_user)
         assert new_entry.decrypted_password == "password1234"
     end
 
@@ -51,11 +51,11 @@ class TC_PasswordEntry < MiniTest::Test
         new_entry = PasswordEntry.new "www.google.ca", "test_user"
         new_user = User.new "master_user", 1234, "some secret here"
 
-        new_entry.lock_password(new_user.secret, new_user, "password1234")
+        new_entry.lock_password(new_user, "password1234")
 
         different_user = User.new "master_user", 1235, "some secret here"
 
-        new_entry.unlock_password(different_user.secret, different_user)
+        new_entry.unlock_password(different_user)
 
         assert new_entry.decrypted_password.nil?
     end
@@ -68,11 +68,11 @@ class TC_PasswordEntry < MiniTest::Test
         new_entry = PasswordEntry.new "www.google.ca", "test_user"
         new_user = User.new "master_user", 1234, "some secret here"
 
-        new_entry.lock_password(new_user.secret, new_user, "password1234")
+        new_entry.lock_password(new_user, "password1234")
 
         different_user = User.new "master_user", 1234, "Some secret here"
 
-        new_entry.unlock_password(different_user.secret, different_user)
+        new_entry.unlock_password(different_user)
 
         assert new_entry.decrypted_password.nil?
     end

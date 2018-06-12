@@ -22,9 +22,9 @@ class PasswordEntry
     ############################################################################
     # Unlock a password with the secret it was locked with
     ############################################################################
-    def unlock_password(secret, user)
+    def unlock_password(user)
         Logging.logger.info "Trying to unlock website " + @site_name + " user name " + @user_name + " for user " + user.name
-        password_key = Utils.make_entry_key(secret, @site_name, @user_name)
+        password_key = Utils.make_entry_key(user.secret, @site_name, @user_name)
         # Now decrypt the password
         cipher = OpenSSL::Cipher::AES.new(256, :GCM)
         cipher.decrypt
@@ -38,19 +38,18 @@ class PasswordEntry
         rescue OpenSSL::Cipher::CipherError
             Logging.logger.error "Failed to unlock website " + @site_name + " user name " + @user_name
             @decrypted_password = nil
-        end
-        if !@decrypted_password.nil?
+        else
             Logging.logger.info "Unlocked website " + @site_name + " user name " + @user_name
         end
-        @decrypted_password
+        nil
     end
 
     ############################################################################
     # Lock a password with a secret
     ############################################################################
-    def lock_password(secret, user, password)
+    def lock_password(user, password)
         Logging.logger.info "Trying to lock website " + @site_name + " user name " + @user_name + " for user " + user.name
-        password_key = Utils.make_entry_key(secret, @site_name, @user_name)
+        password_key = Utils.make_entry_key(user.secret, @site_name, @user_name)
         # Now decrypt the password
         cipher = OpenSSL::Cipher::AES.new(256, :GCM)
         cipher.encrypt
@@ -63,10 +62,8 @@ class PasswordEntry
         rescue OpenSSL::Cipher::CipherError
             Logging.logger.error "Failed to lock website " + @site_name + " user name " + @user_name + " for user " + user.name
             @encrypted_password = nil
-        end
-        if !@encrypted_password.nil?
+        else
             Logging.logger.info "Locked website " + @site_name + " user name " + @user_name
-            @password = nil
         end
         @auth_tag = cipher.auth_tag
         @encrypted_password
