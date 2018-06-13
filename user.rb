@@ -3,6 +3,16 @@ require './utils/compare'
 require 'openssl'
 
 ################################################################################
+# Custom exception for trying to use a locked user
+################################################################################
+class LockedError < StandardError
+    def initialize(user)
+        super("Tried to use locked user")
+        Logging.logger.error "Trying to use locked user " + user.name
+    end
+end
+
+################################################################################
 # User class
 #
 # Represents a user with a unique ID, and secret.
@@ -110,5 +120,15 @@ class User
         cipher.auth_tag
     end
 
+    ############################################################################
+    # Overriden accessor to prevent returning the secret if the user is locked
+    ############################################################################
+    def secret
+        if @unlocked
+            @secret
+        else
+            raise LockedError.new self
+        end
+    end
     private :decrypt_secret, :encrypt_secret
 end

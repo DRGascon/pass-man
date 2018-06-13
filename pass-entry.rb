@@ -4,6 +4,7 @@
 
 require './utils/logging'
 require './utils/key_gen'
+require './user'
 
 class PasswordEntry
 
@@ -25,6 +26,7 @@ class PasswordEntry
     def unlock_password(user)
         Logging.logger.info "Trying to unlock website " + @site_name + " user name " + @user_name + " for user " + user.name
         password_key = Utils.make_entry_key(user.secret, @site_name, @user_name)
+
         # Now decrypt the password
         cipher = OpenSSL::Cipher::AES.new(256, :GCM)
         cipher.decrypt
