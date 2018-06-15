@@ -44,6 +44,10 @@ class TC_UserTest < MiniTest::Test
         # Add the entry
         new_user.add_new_entry("www.google.ca", "dgascon", "password1234") 
         assert new_user.entries.length == 1
+        # Now get an entry
+        password = new_user.get_website_user_password "www.google.ca", "dgascon"
+ 
+        assert password == "password1234"
     end
 
     def test_adding_locked_user
@@ -52,5 +56,24 @@ class TC_UserTest < MiniTest::Test
         assert_raises(LockedError) { new_user.add_new_entry("www.google.ca", "dgascon", "password1234") }
         # Nothing should've been added
         assert new_user.entries.length == 0
+
     end
+
+    def test_finding_locked_user_entry
+        new_user = User.new "dgascon", 1234, "this is some special secret"
+
+        assert new_user.entries.length == 0
+        # Lock and unlock the user so we can add an entry
+        new_user.lock("23423490hasdfasldvn01243")
+        new_user.unlock("23423490hasdfasldvn01243")
+        # Add the entry
+        new_user.add_new_entry("www.google.ca", "dgascon", "password1234") 
+        assert new_user.entries.length == 1
+        # Lock the user
+        new_user.lock("23423490hasdfasldvn01243")
+        # Now get an entry
+        assert_raises(LockedError) { password = new_user.get_website_user_password "www.google.ca", "dgascon" }
+ 
+    end
+
 end

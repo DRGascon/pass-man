@@ -139,6 +139,11 @@ class User
     ############################################################################
     def get_website_user_password(website, user_name)
         found_entry = @entries.select { |entry| entry.site_name == website && entry.user_name == user_name }
+        # We found the entry, unlock it
+        if found_entry.nil? == false
+            found_entry[0].unlock_password(self)
+            found_entry[0].decrypted_password
+        end
     end
 
     ############################################################################
