@@ -112,7 +112,7 @@ class TC_PasswordEntry < MiniTest::Test
         # This will do util users have encrypted secrets by default
         new_user.lock("fake_pass")
 
-        e = assert_raises(LockedError) { new_entry.lock_password(new_user, "password1234") }
+        assert_raises(LockedError) { new_entry.lock_password(new_user, "password1234") }
     end
 
 end

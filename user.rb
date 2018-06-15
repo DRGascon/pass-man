@@ -1,5 +1,6 @@
 require './utils/logging'
 require './utils/compare'
+require './pass-entry'
 require 'openssl'
 
 ################################################################################
@@ -21,7 +22,7 @@ end
 ################################################################################
 class User
     attr_accessor :name, :id, :iv, :auth_tag
-    attr_reader :secret, :unlocked
+    attr_reader :secret, :unlocked, :entries
 
     ############################################################################
     # Initialize a new user
@@ -35,6 +36,9 @@ class User
         @id = id
         @secret = secret
         @unlocked = false
+        # Not sure if I want this to be a hash or array, we'll start with array
+        # and go from there
+        @entries = []
         Logging.logger.info "Initialized new user " + name + " id " + id.to_s
     end
 
@@ -121,6 +125,23 @@ class User
     end
 
     ############################################################################
+    # Add a new website entry for a user
+    ############################################################################
+    def add_new_entry(website, user_name, password)
+        entry = PasswordEntry.new website, user_name 
+        entry.lock_password(self, password)
+        @entries << entry
+    end
+
+
+    ############################################################################
+    # Find a website and user name with the current user
+    ############################################################################
+    def get_website_user_password(website, user_name)
+        found_entry = @entries.select { |entry| entry.site_name == website && entry.user_name == user_name }
+    end
+
+    ############################################################################
     # Overriden accessor to prevent returning the secret if the user is locked
     ############################################################################
     def secret
@@ -130,5 +151,6 @@ class User
             raise LockedError.new self
         end
     end
+
     private :decrypt_secret, :encrypt_secret
 end
