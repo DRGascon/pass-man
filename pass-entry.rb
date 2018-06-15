@@ -5,6 +5,7 @@
 require './utils/logging'
 require './utils/key_gen'
 require './user'
+require 'json'
 
 class PasswordEntry
 
@@ -69,6 +70,23 @@ class PasswordEntry
         end
         @auth_tag = cipher.auth_tag
         @encrypted_password
+    end
+
+    def array_to_str(array)
+        array.nil? ? nil : array.unpack("H*").first.force_encoding('UTF-8')
+
+
+    end
+
+    def to_json
+        JSON.generate({
+            :json_class => "PasswordEntry",
+            :iv => array_to_str(@iv),
+            :user_name => @user_name,
+            :site_name => @site_name,
+            :encrypted_password => array_to_str(@encrypted_password),
+            :auth_tag => array_to_str(@auth_tag)
+        })
     end
 
 end
