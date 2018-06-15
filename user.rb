@@ -142,7 +142,6 @@ class User
         # We found the entry, unlock it
         if found_entry.nil? == false
             found_entry[0].unlock_password(self)
-            found_entry[0].decrypted_password
         end
     end
 

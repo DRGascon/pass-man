@@ -9,7 +9,7 @@ require './user'
 class PasswordEntry
 
     attr_accessor :site_name, :user_name
-    attr_reader :password, :encrypted_password, :auth_tag, :iv, :decrypted_password
+    attr_reader :password, :encrypted_password, :auth_tag, :iv
 
     ############################################################################
     # Initialize the entry
@@ -36,14 +36,14 @@ class PasswordEntry
         cipher.auth_data = user.name + user.id.to_s
 
         begin
-            @decrypted_password = cipher.update(@encrypted_password) + cipher.final
+            decrypted_password = cipher.update(@encrypted_password) + cipher.final
         rescue OpenSSL::Cipher::CipherError
             Logging.logger.error "Failed to unlock website " + @site_name + " user name " + @user_name
-            @decrypted_password = nil
+            decrypted_password = nil
         else
             Logging.logger.info "Unlocked website " + @site_name + " user name " + @user_name
         end
-        nil
+        decrypted_password
     end
 
     ############################################################################
@@ -70,4 +70,5 @@ class PasswordEntry
         @auth_tag = cipher.auth_tag
         @encrypted_password
     end
+
 end
