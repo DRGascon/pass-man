@@ -4,6 +4,7 @@
 
 require './utils/logging'
 require './utils/key_gen'
+require './utils/string'
 require './user'
 require 'json'
 
@@ -72,20 +73,17 @@ class PasswordEntry
         @encrypted_password
     end
 
-    def array_to_str(array)
-        array.nil? ? nil : array.unpack("H*").first.force_encoding('UTF-8')
-
-
-    end
-
+    ############################################################################
+    # Convert the object to JSON representation
+    ############################################################################
     def to_json
         JSON.generate({
             :json_class => "PasswordEntry",
-            :iv => array_to_str(@iv),
+            :iv => Utils.array_to_str(@iv),
             :user_name => @user_name,
             :site_name => @site_name,
-            :encrypted_password => array_to_str(@encrypted_password),
-            :auth_tag => array_to_str(@auth_tag)
+            :encrypted_password => Utils.array_to_str(@encrypted_password),
+            :auth_tag => Utils.array_to_str(@auth_tag)
         })
     end
 

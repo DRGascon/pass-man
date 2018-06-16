@@ -48,8 +48,8 @@ class TC_PasswordEntry < MiniTest::Test
 
         new_entry.lock_password(new_user, "password1234")
 
-        new_entry.unlock_password(new_user)
-        assert new_entry.decrypted_password == "password1234"
+        decrypted_password = new_entry.unlock_password(new_user)
+        assert decrypted_password == "password1234"
     end
 
     ############################################################################
@@ -72,9 +72,9 @@ class TC_PasswordEntry < MiniTest::Test
         different_user.lock("fake_pass")
         different_user.unlock("fake_pass")
 
-        new_entry.unlock_password(different_user)
+        decrypted_password = new_entry.unlock_password(different_user)
 
-        assert new_entry.decrypted_password.nil?
+        assert decrypted_password.nil?
     end
 
     ############################################################################
@@ -97,9 +97,9 @@ class TC_PasswordEntry < MiniTest::Test
         different_user.lock("fake_pass")
         different_user.unlock("fake_pass")
 
-        new_entry.unlock_password(different_user)
+        decrypted_password = new_entry.unlock_password(different_user)
 
-        assert new_entry.decrypted_password.nil?
+        assert decrypted_password.nil?
     end
 
     ############################################################################
@@ -115,4 +115,11 @@ class TC_PasswordEntry < MiniTest::Test
         assert_raises(LockedError) { new_entry.lock_password(new_user, "password1234") }
     end
 
+    def test_json_empty_entry
+        new_entry = PasswordEntry.new "www.google.ca", "test_user"
+
+        entry_json = new_entry.to_json
+
+        assert entry_json == '{"json_class":"PasswordEntry","iv":null,"user_name":"test_user","site_name":"www.google.ca","encrypted_password":null,"auth_tag":null}'
+    end
 end
