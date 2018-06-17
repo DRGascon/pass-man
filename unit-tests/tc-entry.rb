@@ -115,11 +115,31 @@ class TC_PasswordEntry < MiniTest::Test
         assert_raises(LockedError) { new_entry.lock_password(new_user, "password1234") }
     end
 
+    ############################################################################
+    # Test serializing a new entry
+    ############################################################################
     def test_json_empty_entry
         new_entry = PasswordEntry.new "www.google.ca", "test_user"
 
         entry_json = new_entry.to_json
 
         assert entry_json == '{"json_class":"PasswordEntry","iv":null,"user_name":"test_user","site_name":"www.google.ca","encrypted_password":null,"auth_tag":null}'
+    end
+
+    ############################################################################
+    # Test serializing a locked entry
+    ############################################################################
+    def test_json_locked_entry
+        new_entry = PasswordEntry.new "www.google.ca", "test_user"
+        new_user = User.new "master_user", 1234, "Some secret here"
+
+        new_user.lock("fake_pass")
+        new_user.unlock("fake_pass")
+
+        new_entry.lock_password(new_user, "password1234")
+
+        entry_json = new_entry.to_json
+
+        assert entry_json = {"json_class":"PasswordEntry","iv":"3ad76fe5685e8f53a7bbb523","user_name":"test_user","site_name":"www.google.ca","encrypted_password":"98f2fa2d672cb4fda1d539ae","auth_tag":"66e897aab622386dd30b2c4ae1c1c5e7"}
     end
 end
