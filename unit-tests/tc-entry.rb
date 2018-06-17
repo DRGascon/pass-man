@@ -142,4 +142,21 @@ class TC_PasswordEntry < MiniTest::Test
 
         assert entry_json = {"json_class":"PasswordEntry","iv":"3ad76fe5685e8f53a7bbb523","user_name":"test_user","site_name":"www.google.ca","encrypted_password":"98f2fa2d672cb4fda1d539ae","auth_tag":"66e897aab622386dd30b2c4ae1c1c5e7"}
     end
+
+    def test_json_deserialize
+        new_entry = PasswordEntry.new
+        new_user = User.new "master_user", 1234, "Some secret here"
+
+        new_user.lock("fake_pass")
+        new_user.unlock("fake_pass")
+
+        new_entry.from_json '{"json_class":"PasswordEntry","iv":"d4d2c2617dd3cb9c716571f9","user_name":"test_user","site_name":"www.google.ca","encrypted_password":"201894205d3f112fefa1e7f7","auth_tag":"a7a81df2c35c28ca5a345230b0392793"}'
+
+        assert new_entry.site_name == "www.google.ca"
+        assert new_entry.user_name == "test_user"
+
+        decrypted_password = new_entry.unlock_password(new_user)
+
+        assert decrypted_password = "password1234"
+    end
 end

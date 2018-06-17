@@ -16,7 +16,7 @@ class PasswordEntry
     ############################################################################
     # Initialize the entry
     ############################################################################
-    def initialize(site_name, user_name)
+    def initialize(site_name = "", user_name = "")
         Logging.logger.info "Creating password entry for site " + site_name + " user " + user_name
         @site_name = site_name
         @user_name = user_name
@@ -77,6 +77,7 @@ class PasswordEntry
     # Convert the object to JSON representation
     ############################################################################
     def to_json
+        Logging.logger.info "Serializing PasswordEntry for website " + @site_name + " user name " + @user_name
         JSON.generate({
             :json_class => "PasswordEntry",
             :iv => Utils.array_to_str(@iv),
@@ -85,6 +86,34 @@ class PasswordEntry
             :encrypted_password => Utils.array_to_str(@encrypted_password),
             :auth_tag => Utils.array_to_str(@auth_tag)
         })
+    end
+
+    ############################################################################
+    # Retrieve an object from JSON representation
+    ############################################################################
+    def from_json(json_string)
+        parsed_json = JSON.parse(json_string)
+        Logging.logger.info "Trying to deserialize PasswordEntry"
+        # Make sure this is for this class
+        if parsed_json["json_class"] == "PasswordEntry"
+            @user_name = parsed_json["user_name"]
+            @site_name = parsed_json["site_name"]
+            # Only accept sensitive information if all pieces are present
+            if parsed_json["iv"] and parsed_json["iv"].length == 24
+                    parsed_json["encrypted_password"] and
+                    parsed_json["auth_tag"] and parsed_json["auth_tag"].length == 32
+
+                    @iv = parsed_json["iv"].split.pack("H*")
+                    @encrypted_password = parsed_json["encrypted_password"].split.pack("H*")
+                    @auth_tag = parsed_json["auth_tag"].split.pack("H*")
+            else
+                puts parsed_json["iv"]
+                puts parsed_json["encrypted_password"]
+                puts parsed_json["auth_tag"]
+                Logging.logger.error "Deserialization error"
+                nil
+            end
+        end
     end
 
 end
