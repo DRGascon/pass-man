@@ -225,4 +225,23 @@ class TC_PasswordEntry < MiniTest::Test
         assert new_entry.auth_tag.nil?
     end
 
+    ############################################################################
+    # Test de-serializing a locked entry with a changed encrypted password
+    ############################################################################
+    def test_json_deserialize_changed_pass
+        new_entry = PasswordEntry.new
+        new_user = User.new "master_user", 1234, "Some secret here"
+
+        new_user.lock("fake_pass")
+        new_user.unlock("fake_pass")
+
+        result = new_entry.from_json '{"json_class":"PasswordEntry","iv":"d4d2c2617dd3cb9c716571f9","user_name":"test_user","site_name":"www.google.ca","encrypted_password":"301894205d1f112fefa1e7f7","auth_tag":"a7a81df2c35c28ca5a345230b0392793"}'
+
+        assert result == true
+
+        decrypted_password = new_entry.unlock_password(new_user)
+
+        assert decrypted_password.nil?
+    end
+
 end
