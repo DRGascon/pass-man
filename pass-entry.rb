@@ -92,6 +92,7 @@ class PasswordEntry
     # Retrieve an object from JSON representation
     ############################################################################
     def from_json(json_string)
+        result = false
         parsed_json = JSON.parse(json_string)
         Logging.logger.info "Trying to deserialize PasswordEntry"
         # Make sure this is for this class
@@ -99,21 +100,24 @@ class PasswordEntry
             @user_name = parsed_json["user_name"]
             @site_name = parsed_json["site_name"]
             # Only accept sensitive information if all pieces are present
-            if parsed_json["iv"] and parsed_json["iv"].length == 24
+            if parsed_json["iv"] and parsed_json["iv"].length == 24 and
                     parsed_json["encrypted_password"] and
                     parsed_json["auth_tag"] and parsed_json["auth_tag"].length == 32
 
                     @iv = parsed_json["iv"].split.pack("H*")
                     @encrypted_password = parsed_json["encrypted_password"].split.pack("H*")
                     @auth_tag = parsed_json["auth_tag"].split.pack("H*")
+                    result = true
             else
-                puts parsed_json["iv"]
-                puts parsed_json["encrypted_password"]
-                puts parsed_json["auth_tag"]
-                Logging.logger.error "Deserialization error"
-                nil
+                # Clear out anything we might've set
+                @user_name = nil
+                @site_name = nil
             end
         end
+        if result == false
+            Logging.logger.error "Failed to deserialize"
+        end
+        result
     end
 
 end
