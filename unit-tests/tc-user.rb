@@ -76,4 +76,14 @@ class TC_UserTest < MiniTest::Test
  
     end
 
+    def test_secret_generation
+        new_user = User.new "dgascon", 1234, nil
+
+        new_user.lock("password1234")
+        new_user.unlock("password1234")
+
+        assert new_user.secret.nil? == false
+        assert new_user.secret.length == 256/8
+    end
+
 end

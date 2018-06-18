@@ -31,10 +31,10 @@ class User
     # id - the user id
     # secret - the user's secret
     ############################################################################
-    def initialize(name, id, secret)
+    def initialize(name, id, secret = nil)
         @name = name
         @id = id
-        @secret = secret
+        @secret = (!secret.nil? and secret.length == 256/8 ) ? secret : Utils.generate_random_bytes(256/8)
         @unlocked = false
         # Not sure if I want this to be a hash or array, we'll start with array
         # and go from there
