@@ -1,0 +1,1 @@
+print test.unpack("H*");
