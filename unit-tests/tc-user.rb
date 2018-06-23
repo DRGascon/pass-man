@@ -72,7 +72,7 @@ class TC_UserTest < MiniTest::Test
         # Lock the user
         new_user.lock("23423490hasdfasldvn01243")
         # Now get an entry
-        assert_raises(LockedError) { password = new_user.get_website_user_password "www.google.ca", "dgascon" }
+        assert_raises(LockedError) { new_user.get_website_user_password "www.google.ca", "dgascon" }
  
     end
 

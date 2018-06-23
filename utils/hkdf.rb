@@ -11,7 +11,7 @@ module Crypto
     def self.hkdf_extract(salt, ikm)
         # No explicit handling of empty salt case as HMAC by definition
         # will zero pat any key that isn't long enough
-        prk = OpenSSL::HMAC.digest(OpenSSL::Digest::SHA256.new, salt, ikm)
+        OpenSSL::HMAC.digest(OpenSSL::Digest::SHA256.new, salt, ikm)
     end
 
     ############################################################################

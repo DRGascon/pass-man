@@ -10,7 +10,7 @@ module Utils
         # Use SHA-512
         digest = OpenSSL::Digest::SHA512.new
         # First create our key through PBKDF2
-        password_key = OpenSSL::PKCS5.pbkdf2_hmac(secret, site_name + user_name, 10000, 32, digest)
+        OpenSSL::PKCS5.pbkdf2_hmac(secret, site_name + user_name, 10000, 32, digest)
     end
 
     ############################################################################

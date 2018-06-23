@@ -1,6 +1,5 @@
 require './utils/logging'
 require './utils/compare'
-require './pass-entry'
 require 'openssl'
 
 ################################################################################
@@ -22,7 +21,7 @@ end
 ################################################################################
 class User
     attr_accessor :name, :id, :iv, :auth_tag
-    attr_reader :secret, :unlocked, :entries
+    attr_reader :unlocked, :entries
 
     ############################################################################
     # Initialize a new user
@@ -36,6 +35,7 @@ class User
         @id = id
         @secret = (!secret.nil? and secret.length == 256/8 ) ? secret : Utils.generate_random_bytes(256/8)
         @unlocked = false
+        @iv = nil
         # Not sure if I want this to be a hash or array, we'll start with array
         # and go from there
         @entries = []
@@ -63,7 +63,7 @@ class User
     def generate_key(password)
         digest = OpenSSL::Digest::SHA512.new
         # Generate the key based on the password
-        secret_key = OpenSSL::PKCS5.pbkdf2_hmac(password, @id.to_s, 20000, 32, digest)
+        OpenSSL::PKCS5.pbkdf2_hmac(password, @id.to_s, 20000, 32, digest)
     end
 
     ############################################################################

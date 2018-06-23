@@ -20,6 +20,9 @@ class PasswordEntry
         Logging.logger.info "Creating password entry for site " + site_name + " user " + user_name
         @site_name = site_name
         @user_name = user_name
+        @iv = nil
+        @encrypted_password = nil
+        @auth_tag = nil
     end
 
     ############################################################################
