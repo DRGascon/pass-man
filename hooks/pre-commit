@@ -1,0 +1,5 @@
+#!/bin/sh
+
+rake test
+
+[[ $? -ne 0 ]] && echo "Failed unit tests, won't allow commit" && exit 1
