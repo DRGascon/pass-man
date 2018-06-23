@@ -1,4 +1,5 @@
 require 'openssl'
+require 'securerandom'
 
 module Utils
 
@@ -16,11 +17,6 @@ module Utils
     # Generate pseudo random bytes of a specific length
     ############################################################################
     def self.generate_random_bytes(length)
-        # Check to see if we have enough entropy
-        if OpenSSL::Random.status?
-            OpenSSL::Random.pseudo_bytes(length)
-        else
-            nil
-        end
+        SecureRandom.random_bytes(length)
     end
 end

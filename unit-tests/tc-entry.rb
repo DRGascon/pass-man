@@ -131,7 +131,7 @@ class TC_PasswordEntry < MiniTest::Test
     ############################################################################
     def test_json_locked_entry
         new_entry = PasswordEntry.new "www.google.ca", "test_user"
-        new_user = User.new "master_user", 1234, "Some secret here"
+        new_user = User.new "master_user", 1234, "12345678901234567890123456789012"
 
         new_user.lock("fake_pass")
         new_user.unlock("fake_pass")
@@ -140,7 +140,16 @@ class TC_PasswordEntry < MiniTest::Test
 
         entry_json = new_entry.to_json
 
-        assert entry_json = {"json_class":"PasswordEntry","iv":"3ad76fe5685e8f53a7bbb523","user_name":"test_user","site_name":"www.google.ca","encrypted_password":"98f2fa2d672cb4fda1d539ae","auth_tag":"66e897aab622386dd30b2c4ae1c1c5e7"}
+        parsed = JSON.parse entry_json
+
+        assert parsed["json_class"] == "PasswordEntry"
+        assert parsed["iv"].length == 24
+        assert parsed["user_name"] == "test_user"
+        assert parsed["site_name"] == "www.google.ca"
+        # Double length since the stored string is a byte string
+        assert parsed["encrypted_password"].length == "password1234".length * 2
+        assert parsed["auth_tag"].length == 32
+
     end
 
     ############################################################################
@@ -148,12 +157,12 @@ class TC_PasswordEntry < MiniTest::Test
     ############################################################################
     def test_json_deserialize
         new_entry = PasswordEntry.new
-        new_user = User.new "master_user", 1234, "Some secret here"
+        new_user = User.new "master_user", 1234, "12345678901234567890123456789012"
 
         new_user.lock("fake_pass")
         new_user.unlock("fake_pass")
 
-        result = new_entry.from_json '{"json_class":"PasswordEntry","iv":"d4d2c2617dd3cb9c716571f9","user_name":"test_user","site_name":"www.google.ca","encrypted_password":"201894205d3f112fefa1e7f7","auth_tag":"a7a81df2c35c28ca5a345230b0392793"}'
+        result = new_entry.from_json '{"json_class":"PasswordEntry","iv":"c3f8f7bd57f45f413aa2ead7","user_name":"test_user","site_name":"www.google.ca","encrypted_password":"b45e13a61cdde6128d831641","auth_tag":"3115ecfddd08e1fd9092f87682e6b820"}'
 
         assert result == true
         assert new_entry.site_name == "www.google.ca"
