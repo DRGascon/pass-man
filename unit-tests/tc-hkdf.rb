@@ -13,11 +13,11 @@ class TC_HKDFTest < MiniTest::Test
 
         ikm = Array.new(22, 0x0B).pack("C*")
         salt = (0x00..0x0C).to_a.pack("C*")
+        info = (0xF0..0xF9).to_a.pack("C*")
         prk = Crypto.hkdf_extract(salt, ikm)
         # Check the extract step
         assert prk.unpack("H*")[0] == "077709362c2e32df0ddc3f0dc47bba6390b6c73bb50f9c3122ec844ad7c2b3e5"
 
-        info = (0xF0..0xF9).to_a.pack("C*")
         # Now that the ikm is good, call the expand step
         okm = Crypto.hkdf_expand(prk, info, 42)
 
@@ -39,5 +39,20 @@ class TC_HKDFTest < MiniTest::Test
         okm = Crypto.hkdf_expand(prk, info, 82)
 
         assert okm.unpack("H*")[0] == "b11e398dc80327a1c8e7f78c596a49344f012eda2d4efad8a050cc4c19afa97c59045a99cac7827271cb41c65e590e09da3275600c2f09b8367793a9aca3db71cc30c58179ec3e87c14c01d5c1f3434f1d87"
+    end
+
+    def test_hkdf_kat3
+
+        ikm = Array.new(22, 0x0B).pack("C*")
+        salt = ""
+        info = ""
+
+        prk = Crypto.hkdf_extract(salt, ikm)
+
+        assert prk.unpack("H*")[0] == "19ef24a32c717b167f33a91d6f648bdf96596776afdb6377ac434c1c293ccb04"
+
+        okm = Crypto.hkdf_expand(prk, info, 42)
+
+        assert okm.unpack("H*")[0] == "8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d9d201395faa4b61a96c8"
     end
 end
