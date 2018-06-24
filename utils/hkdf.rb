@@ -36,4 +36,9 @@ module Crypto
         # Return the L bytes of the OKM
         okm[0..output_length-1]
     end
+
+    def self.hkdf(salt, ikm, info, output_length)
+        prk = hkdf_extract(salt, ikm)
+        hkdf_expand(prk, info, output_length)
+    end
 end

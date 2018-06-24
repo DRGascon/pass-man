@@ -6,11 +6,11 @@ module Utils
     ############################################################################
     # Give a website entry and secret, derive a new key
     ############################################################################
-    def self.make_entry_key(secret, site_name, user_name)
-        # Use SHA-512
-        digest = OpenSSL::Digest::SHA512.new
-        # First create our key through PBKDF2
-        OpenSSL::PKCS5.pbkdf2_hmac(secret, site_name + user_name, 10000, 32, digest)
+    def self.make_entry_key(secret, site_name, user_name, salt = nil)
+        if salt.nil? or salt.length != 64
+            salt = generate_random_bytes(64)
+        end
+        {:salt => salt, :key => Crypto.hkdf(salt, secret, site_name + user_name, 32) }
     end
 
     ############################################################################

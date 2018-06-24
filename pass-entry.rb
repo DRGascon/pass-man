@@ -23,6 +23,7 @@ class PasswordEntry
         @iv = nil
         @encrypted_password = nil
         @auth_tag = nil
+        @salt = nil
     end
 
     ############################################################################
@@ -30,13 +31,13 @@ class PasswordEntry
     ############################################################################
     def unlock_password(user)
         Logging.logger.info "Trying to unlock website " + @site_name + " user name " + @user_name + " for user " + user.name
-        password_key = Utils.make_entry_key(user.secret, @site_name, @user_name)
+        password_key = Utils.make_entry_key(user.secret, @site_name, @user_name, @salt)
 
         # Now decrypt the password
         cipher = OpenSSL::Cipher::AES.new(256, :GCM)
         cipher.decrypt
         cipher.iv = @iv
-        cipher.key = password_key
+        cipher.key = password_key[:key]
         cipher.auth_tag = @auth_tag
         cipher.auth_data = user.name + user.id.to_s
 
@@ -56,13 +57,14 @@ class PasswordEntry
     ############################################################################
     def lock_password(user, password)
         Logging.logger.info "Trying to lock website " + @site_name + " user name " + @user_name + " for user " + user.name
-        password_key = Utils.make_entry_key(user.secret, @site_name, @user_name)
+        password_key = Utils.make_entry_key(user.secret, @site_name, @user_name, @salt)
         # Now decrypt the password
         cipher = OpenSSL::Cipher::AES.new(256, :GCM)
         cipher.encrypt
         @iv = @iv.nil? ? cipher.random_iv : @iv
+        @salt = password_key[:salt]
         cipher.iv = @iv
-        cipher.key = password_key
+        cipher.key = password_key[:key]
         cipher.auth_data = user.name + user.id.to_s
         begin
             @encrypted_password = cipher.update(password) + cipher.final
@@ -87,7 +89,8 @@ class PasswordEntry
             :user_name => @user_name,
             :site_name => @site_name,
             :encrypted_password => Utils.array_to_str(@encrypted_password),
-            :auth_tag => Utils.array_to_str(@auth_tag)
+            :auth_tag => Utils.array_to_str(@auth_tag),
+            :salt => Utils.array_to_str(@salt)
         })
     end
 
@@ -105,11 +108,13 @@ class PasswordEntry
             # Only accept sensitive information if all pieces are present
             if parsed_json["iv"] and parsed_json["iv"].length == 24 and
                     parsed_json["encrypted_password"] and
-                    parsed_json["auth_tag"] and parsed_json["auth_tag"].length == 32
+                    parsed_json["auth_tag"] and parsed_json["auth_tag"].length == 32 and
+                    parsed_json["salt"] and parsed_json["salt"].length == 128
 
                     @iv = parsed_json["iv"].split.pack("H*")
                     @encrypted_password = parsed_json["encrypted_password"].split.pack("H*")
                     @auth_tag = parsed_json["auth_tag"].split.pack("H*")
+                    @salt = parsed_json["salt"].split.pack("H*")
                     result = true
             else
                 # Clear out anything we might've set
