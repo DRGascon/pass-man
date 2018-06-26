@@ -8,14 +8,27 @@ class EntriesController < ApplicationController
     def create
         # For now we'll use a dummy user
         dummy_user = User.new "dgascon", 1, "12345678901234567890123456789012"
-        encrypted_entry = PasswordEntry.new params[:entry][:website], params[:entry][:user_name]
+        encrypted_entry = PasswordEntry.new params[:entry][:site_name], params[:entry][:user_name]
 
         dummy_user.lock("123912840913750sadfjahsdfkasehruiw")
         dummy_user.unlock("123912840913750sadfjahsdfkasehruiw")
 
         encrypted_entry.lock_password dummy_user, params[:entry][:password]
 
-        @entry = Entry.new encrypted_entry.site_name, encrypted_entry.user_name, encrypted_entry.encrypted_password, encrypted_entry.auth_tag, encrypted_entry.iv
-        params[:entry]
+        params[:entry][:encrypted_password] = Utils.array_to_str(encrypted_entry.encrypted_password)
+        params[:entry][:iv] = Utils.array_to_str(encrypted_entry.iv)
+        params[:entry][:auth_tag] = Utils.array_to_str(encrypted_entry.auth_tag)
+        params[:entry][:salt] = Utils.array_to_str(encrypted_entry.salt)
+
+        puts params
+        @entry = Entry.new entry_params
+
+        @entry.save
+        redirect_to @entry
     end
+
+    private
+        def entry_params
+            params.require(:entry).permit(:site_name, :user_name, :encrypted_password, :iv, :auth_tag, :salt)
+        end
 end
