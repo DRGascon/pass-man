@@ -42,7 +42,11 @@ class EntriesController < ApplicationController
     def show
         @entry = Entry.find(params[:id])
 
-        puts @entry.encrypted_password
+        decrypted_entry = PasswordEntry.new @entry.site_name, @entry.user_name
+        decrypted_entry.set_crypto_values @entry.encrypted_password.split.pack("H*"), @entry.iv.split.pack("H*"), @entry.auth_tag.split.pack("H*"), @entry.salt.split.pack("H*")
+        dummy_user = get_unlocked_dummy_user
+
+        @entry.encrypted_password = decrypted_entry.unlock_password(dummy_user)
     end
 
     private

@@ -52,6 +52,13 @@ class PasswordEntry
         decrypted_password
     end
 
+    def set_crypto_values(encrypted_password, iv, auth_tag, salt)
+        @encrypted_password = encrypted_password
+        @iv = iv
+        @auth_tag = auth_tag
+        @salt = salt
+        puts iv.length
+    end
     ############################################################################
     # Lock a password with a secret
     ############################################################################
