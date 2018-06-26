@@ -27,6 +27,12 @@ class EntriesController < ApplicationController
         redirect_to @entry
     end
 
+    def show
+        @entry = Entry.find(params[:id])
+
+        puts @entry.encrypted_password
+    end
+
     private
         def entry_params
             params.require(:entry).permit(:site_name, :user_name, :encrypted_password, :iv, :auth_tag, :salt)
