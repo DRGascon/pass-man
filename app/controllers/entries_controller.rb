@@ -5,16 +5,28 @@ class EntriesController < ApplicationController
     def new
     end
 
-    def create
-        # For now we'll use a dummy user
+    ############################################################################
+    # Generate, unlock, and return a dummy user.
+    #
+    # This is for getting ramped on rails, once real user auth is in place this
+    # should go away
+    ############################################################################
+    def get_unlocked_dummy_user
         dummy_user = User.new "dgascon", 1, "12345678901234567890123456789012"
-        encrypted_entry = PasswordEntry.new params[:entry][:site_name], params[:entry][:user_name]
-
+        # Here until we have proper user authentication
         dummy_user.lock("123912840913750sadfjahsdfkasehruiw")
         dummy_user.unlock("123912840913750sadfjahsdfkasehruiw")
 
+        dummy_user
+    end
+    def create
+        encrypted_entry = PasswordEntry.new params[:entry][:site_name], params[:entry][:user_name]
+        dummy_user = get_unlocked_dummy_user
+        
+        # Lock the password
         encrypted_entry.lock_password dummy_user, params[:entry][:password]
 
+        # Update the entry with everything needed to decrypt
         params[:entry][:encrypted_password] = Utils.array_to_str(encrypted_entry.encrypted_password)
         params[:entry][:iv] = Utils.array_to_str(encrypted_entry.iv)
         params[:entry][:auth_tag] = Utils.array_to_str(encrypted_entry.auth_tag)
