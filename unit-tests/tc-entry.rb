@@ -1,6 +1,6 @@
 
-require './pass-entry'
-require './user'
+require './entry-crypto/pass-entry'
+require './entry-crypto/user'
 require 'minitest/autorun'
 
 class TC_PasswordEntry < MiniTest::Test

@@ -4,7 +4,7 @@
 #
 #
 
-require './user.rb'
+require './entry-crypto/user.rb'
 require 'minitest/autorun'
 
 class TC_UserTest < MiniTest::Test

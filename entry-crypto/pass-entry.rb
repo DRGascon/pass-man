@@ -5,7 +5,7 @@
 require './utils/logging'
 require './utils/key_gen'
 require './utils/string'
-require './user'
+require './entry-crypto/user'
 require 'json'
 
 class PasswordEntry
