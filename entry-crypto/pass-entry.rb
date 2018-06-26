@@ -10,7 +10,7 @@ require 'json'
 
 class PasswordEntry
 
-    attr_accessor :site_name, :user_name
+    attr_accessor :site_name, :user_name, :salt
     attr_reader :password, :encrypted_password, :auth_tag, :iv
 
     ############################################################################

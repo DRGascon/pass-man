@@ -1,5 +1,6 @@
 require 'openssl'
 require 'securerandom'
+require './utils/hkdf'
 
 module Utils
 
