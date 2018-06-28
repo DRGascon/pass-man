@@ -3,6 +3,7 @@ require './entry-crypto/user'
 
 class EntriesController < ApplicationController
     def new
+        @entry = Entry.new
     end
 
     def create
@@ -21,8 +22,11 @@ class EntriesController < ApplicationController
         puts params
         @entry = Entry.new entry_params
 
-        @entry.save
-        redirect_to @entry
+        if @entry.save
+            redirect_to @entry
+        else
+            render 'new'
+        end
     end
 
     def show
