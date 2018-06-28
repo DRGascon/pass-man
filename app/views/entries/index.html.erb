@@ -1,0 +1,16 @@
+<h1> Password Entries </h1>
+
+<table>
+    <tr>
+        <th>Website</th>
+        <th>User Name</th>
+        <th>Password</th>
+    </tr>
+    <% @entries.each do |entry| %>
+        <tr>
+            <td><%= entry.site_name %></td>
+            <td><%= entry.user_name %></td>
+            <td><%= entry.encrypted_password %></td>
+        </tr>
+    <% end %>
+</table>
