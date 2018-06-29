@@ -9,7 +9,7 @@ class EntriesController < ApplicationController
     def edit
         @entry = Entry.find(params[:id])
 
-        @entry.encrypted_password = get_decrypted_password @entry
+        @entry.encrypted_password = get_displayable_decrypted_password @entry
     end
 
     def create
@@ -60,17 +60,28 @@ class EntriesController < ApplicationController
         end
     end
 
+    def destroy
+        @entry = Entry.find(params[:id])
+
+        # We own this password, we can delete it
+        if !(get_decrypted_password @entry).nil?
+            @entry.destroy
+        end
+
+        redirect_to entries_path
+    end
+
     def show
         @entry = Entry.find(params[:id])
 
-        @entry.encrypted_password = get_decrypted_password @entry
+        @entry.encrypted_password = get_displayable_decrypted_password @entry
     end
 
     def index
         @entries = []
         # Iterate through each entry, decrypting if possible
         Entry.all.each do |entry|
-            entry.encrypted_password = get_decrypted_password entry
+            entry.encrypted_password = get_displayable_decrypted_password entry
             @entries << entry
         end
 
@@ -99,7 +110,7 @@ class EntriesController < ApplicationController
 
         ########################################################################
         # Take an entry, and return it's decrypted password as a string
-        # If decryption can't be done, ******** will be returned
+        # If decryption can't be done, nil will be returned
         ########################################################################
         def get_decrypted_password(entry)
             # Use a dummy user until we have valid authentication
@@ -107,14 +118,19 @@ class EntriesController < ApplicationController
             # Create our entry
             decrypted_entry = PasswordEntry.new entry.site_name, entry.user_name
             decrypted_entry.set_crypto_values entry.encrypted_password.split.pack("H*"), entry.iv.split.pack("H*"), entry.auth_tag.split.pack("H*"), entry.salt.split.pack("H*")
-            decrypted_password = decrypted_entry.unlock_password user
-            # We failed to get a password, return a hidden entry
-            if decrypted_password.nil?
-                "********"
-            # Decryption worked, return the cleartext password
-            else
-                decrypted_password
-            end
+            decrypted_entry.unlock_password user
+        end
 
+        ########################################################################
+        # A wrapped around get_decrypted_password which will return a masked
+        # entry if decryption failed
+        ########################################################################
+        def get_displayable_decrypted_password(entry)
+            decrypted_password = get_decrypted_password entry
+
+            if decrypted_password.nil?
+                decrypted_password = "********"
+            end
+            decrypted_password
         end
 end
