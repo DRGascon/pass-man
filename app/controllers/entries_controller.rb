@@ -6,6 +6,10 @@ class EntriesController < ApplicationController
         @entry = Entry.new
     end
 
+    def edit
+        @entry = Entry.find(params[:id])
+    end
+
     def create
         encrypted_entry = PasswordEntry.new params[:entry][:site_name], params[:entry][:user_name]
         dummy_user = get_unlocked_dummy_user
@@ -26,6 +30,16 @@ class EntriesController < ApplicationController
             redirect_to @entry
         else
             render 'new'
+        end
+    end
+
+    def update
+        @entry = Entry.find(params[:id])
+
+        if @entry.update(entry_params)
+            redirect_to @entry
+        else
+            render 'edit'
         end
     end
 

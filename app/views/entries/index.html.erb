@@ -7,12 +7,15 @@
         <th>Website</th>
         <th>User Name</th>
         <th>Password</th>
+        <th colspan="2"></th>
     </tr>
     <% @entries.each do |entry| %>
         <tr>
             <td><%= entry.site_name %></td>
             <td><%= entry.user_name %></td>
             <td><%= entry.encrypted_password %></td>
+            <td><%= link_to 'Show', entry_path(entry) %></td>
+            <td><%= link_to 'Edit', edit_entry_path(entry) %></td>
         </tr>
     <% end %>
 </table>
