@@ -1,5 +1,6 @@
 require './utils/logging'
 require './utils/compare'
+require './utils/key_gen.rb'
 require 'openssl'
 
 module EntryCrypto
@@ -22,8 +23,8 @@ end
 # Secrets remain encrypted until the user is authenticated
 ################################################################################
 class User
-    attr_accessor :name, :id, :iv, :auth_tag
-    attr_reader :unlocked, :entries
+    attr_accessor :name, :id
+    attr_reader :unlocked, :iv, :auth_tag, :entries
 
     ############################################################################
     # Initialize a new user
@@ -68,6 +69,11 @@ class User
         OpenSSL::PKCS5.pbkdf2_hmac(password, @id.to_s, 20000, 32, digest)
     end
 
+    def set_crypto_values(iv, auth_tag)
+        @iv = iv
+        @auth_tag = auth_tag
+    end
+
     ############################################################################
     # Decrypt the user's secret key
     ############################################################################
@@ -100,7 +106,9 @@ class User
         @iv = @iv.nil? ? cipher.random_iv : @iv
         key = generate_key(password)
         @auth_tag = encrypt_secret(key, @iv)
+        encrypted_secret = @secret
         @unlocked = false
+        encrypted_secret
     end
 
     ############################################################################
