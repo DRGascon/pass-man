@@ -13,7 +13,7 @@ class EntriesController < ApplicationController
     end
 
     def create
-        encrypted_entry = PasswordEntry.new params[:entry][:site_name], params[:entry][:user_name]
+        encrypted_entry = EntryCrypto::PasswordEntry.new params[:entry][:site_name], params[:entry][:user_name]
         dummy_user = get_unlocked_dummy_user
         
         # Lock the password
@@ -39,7 +39,7 @@ class EntriesController < ApplicationController
         @entry = Entry.find(params[:id])
 
         # Encrypt the new password
-        encrypted_entry = PasswordEntry.new @entry.site_name, @entry.user_name
+        encrypted_entry = EntryCrypto::PasswordEntry.new @entry.site_name, @entry.user_name
         # Use a dummy user for now
         dummy_user = get_unlocked_dummy_user
         
@@ -100,7 +100,7 @@ class EntriesController < ApplicationController
         # should go away
         ############################################################################
         def get_unlocked_dummy_user
-            dummy_user = User.new "dgascon", 1, "12345678901234567890123456789012"
+            dummy_user = EntryCrypto::User.new "dgascon", 1, "12345678901234567890123456789012"
             # Here until we have proper user authentication
             dummy_user.lock("123912840913750sadfjahsdfkasehruiw")
             dummy_user.unlock("123912840913750sadfjahsdfkasehruiw")
@@ -116,7 +116,7 @@ class EntriesController < ApplicationController
             # Use a dummy user until we have valid authentication
             user = get_unlocked_dummy_user
             # Create our entry
-            decrypted_entry = PasswordEntry.new entry.site_name, entry.user_name
+            decrypted_entry = EntryCrypto::PasswordEntry.new entry.site_name, entry.user_name
             decrypted_entry.set_crypto_values entry.encrypted_password.split.pack("H*"), entry.iv.split.pack("H*"), entry.auth_tag.split.pack("H*"), entry.salt.split.pack("H*")
             decrypted_entry.unlock_password user
         end
