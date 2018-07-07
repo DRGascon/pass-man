@@ -2,6 +2,8 @@ require './utils/logging'
 require './utils/compare'
 require 'openssl'
 
+module EntryCrypto
+
 ################################################################################
 # Custom exception for trying to use a locked user
 ################################################################################
@@ -157,4 +159,5 @@ class User
     end
 
     private :decrypt_secret, :encrypt_secret
+end
 end

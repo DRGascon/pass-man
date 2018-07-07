@@ -9,7 +9,7 @@ class TC_PasswordEntry < MiniTest::Test
     # Test our initial status contains what we think
     ############################################################################
     def test_init_state
-        new_entry = PasswordEntry.new "www.google.ca" , "test_user"
+        new_entry = EntryCrypto::PasswordEntry.new "www.google.ca" , "test_user"
         assert new_entry.password == nil
     end
 
@@ -17,8 +17,8 @@ class TC_PasswordEntry < MiniTest::Test
     # Test that our lock works the way we expect
     ############################################################################
     def test_entry_lock
-        new_entry = PasswordEntry.new "www.google.ca", "test_user"
-        new_user = User.new "master_user", 1234, "some secret here"
+        new_entry = EntryCrypto::PasswordEntry.new "www.google.ca", "test_user"
+        new_user = EntryCrypto::User.new "master_user", 1234, "some secret here"
         assert new_entry.iv.nil?
         assert new_entry.auth_tag.nil?
 
@@ -39,8 +39,8 @@ class TC_PasswordEntry < MiniTest::Test
     # Test to make sure we can lock then unlock a password
     ############################################################################
     def test_entry_unlock
-        new_entry = PasswordEntry.new "www.google.ca", "test_user"
-        new_user = User.new "master_user", 1234, "some secret here"
+        new_entry = EntryCrypto::PasswordEntry.new "www.google.ca", "test_user"
+        new_user = EntryCrypto::User.new "master_user", 1234, "some secret here"
 
         # This will do util users have encrypted secrets by default
         new_user.lock("fake_pass")
@@ -57,8 +57,8 @@ class TC_PasswordEntry < MiniTest::Test
     # id
     ############################################################################
     def test_different_user_entry_unlock
-        new_entry = PasswordEntry.new "www.google.ca", "test_user"
-        new_user = User.new "master_user", 1234, "12345678901234567890123456789012"
+        new_entry = EntryCrypto::PasswordEntry.new "www.google.ca", "test_user"
+        new_user = EntryCrypto::User.new "master_user", 1234, "12345678901234567890123456789012"
 
         # This will do util users have encrypted secrets by default
         new_user.lock("fake_pass")
@@ -66,7 +66,7 @@ class TC_PasswordEntry < MiniTest::Test
 
         new_entry.lock_password(new_user, "password1234")
 
-        different_user = User.new "master_user", 1235, "some secret here"
+        different_user = EntryCrypto::User.new "master_user", 1235, "some secret here"
 
         # This will do util users have encrypted secrets by default
         different_user.lock("fake_pass")
@@ -82,8 +82,8 @@ class TC_PasswordEntry < MiniTest::Test
     # secret
     ############################################################################
     def test_different_secret_entry_unlock
-        new_entry = PasswordEntry.new "www.google.ca", "test_user"
-        new_user = User.new "master_user", 1234, "some secret here"
+        new_entry = EntryCrypto::PasswordEntry.new "www.google.ca", "test_user"
+        new_user = EntryCrypto::User.new "master_user", 1234, "some secret here"
 
         # This will do util users have encrypted secrets by default
         new_user.lock("fake_pass")
@@ -91,7 +91,7 @@ class TC_PasswordEntry < MiniTest::Test
 
         new_entry.lock_password(new_user, "password1234")
 
-        different_user = User.new "master_user", 1234, "Some secret here"
+        different_user = EntryCrypto::User.new "master_user", 1234, "Some secret here"
 
         # This will do util users have encrypted secrets by default
         different_user.lock("fake_pass")
@@ -106,20 +106,20 @@ class TC_PasswordEntry < MiniTest::Test
     # Test to make sure we can't unlock with a locked user
     ############################################################################
     def test_locked_user
-        new_entry = PasswordEntry.new "www.google.ca", "test_user"
-        new_user = User.new "master_user", 1234, "some secret here"
+        new_entry = EntryCrypto::PasswordEntry.new "www.google.ca", "test_user"
+        new_user = EntryCrypto::User.new "master_user", 1234, "some secret here"
 
         # This will do util users have encrypted secrets by default
         new_user.lock("fake_pass")
 
-        assert_raises(LockedError) { new_entry.lock_password(new_user, "password1234") }
+        assert_raises(EntryCrypto::LockedError) { new_entry.lock_password(new_user, "password1234") }
     end
 
     ############################################################################
     # Test serializing a new entry
     ############################################################################
     def test_json_empty_entry
-        new_entry = PasswordEntry.new "www.google.ca", "test_user"
+        new_entry = EntryCrypto::PasswordEntry.new "www.google.ca", "test_user"
 
         entry_json = new_entry.to_json
 
@@ -130,8 +130,8 @@ class TC_PasswordEntry < MiniTest::Test
     # Test serializing a locked entry
     ############################################################################
     def test_json_locked_entry
-        new_entry = PasswordEntry.new "www.google.ca", "test_user"
-        new_user = User.new "master_user", 1234, "12345678901234567890123456789012"
+        new_entry = EntryCrypto::PasswordEntry.new "www.google.ca", "test_user"
+        new_user = EntryCrypto::User.new "master_user", 1234, "12345678901234567890123456789012"
 
         new_user.lock("fake_pass")
         new_user.unlock("fake_pass")
@@ -156,8 +156,8 @@ class TC_PasswordEntry < MiniTest::Test
     # Test de-serializing a locked entry properly
     ############################################################################
     def test_json_deserialize
-        new_entry = PasswordEntry.new
-        new_user = User.new "master_user", 1234, "12345678901234567890123456789012"
+        new_entry = EntryCrypto::PasswordEntry.new
+        new_user = EntryCrypto::User.new "master_user", 1234, "12345678901234567890123456789012"
 
         new_user.lock("fake_pass")
         new_user.unlock("fake_pass")
@@ -177,8 +177,8 @@ class TC_PasswordEntry < MiniTest::Test
     # Test de-serializing a locked entry with a changed tag
     ############################################################################
     def test_json_deserialize_bad_tag
-        new_entry = PasswordEntry.new
-        new_user = User.new "master_user", 1234, "Some secret here"
+        new_entry = EntryCrypto::PasswordEntry.new
+        new_user = EntryCrypto::User.new "master_user", 1234, "Some secret here"
 
         new_user.lock("fake_pass")
         new_user.unlock("fake_pass")
@@ -198,8 +198,8 @@ class TC_PasswordEntry < MiniTest::Test
     # Test de-serializing a locked entry with a too short IV
     ############################################################################
     def test_json_deserialize_short_iv
-        new_entry = PasswordEntry.new
-        new_user = User.new "master_user", 1234, "Some secret here"
+        new_entry = EntryCrypto::PasswordEntry.new
+        new_user = EntryCrypto::User.new "master_user", 1234, "Some secret here"
 
         new_user.lock("fake_pass")
         new_user.unlock("fake_pass")
@@ -218,8 +218,8 @@ class TC_PasswordEntry < MiniTest::Test
     # Test de-serializing a locked entry with a too short tag
     ############################################################################
     def test_json_deserialize_short_tag
-        new_entry = PasswordEntry.new
-        new_user = User.new "master_user", 1234, "Some secret here"
+        new_entry = EntryCrypto::PasswordEntry.new
+        new_user = EntryCrypto::User.new "master_user", 1234, "Some secret here"
 
         new_user.lock("fake_pass")
         new_user.unlock("fake_pass")
@@ -238,8 +238,8 @@ class TC_PasswordEntry < MiniTest::Test
     # Test de-serializing a locked entry with a changed encrypted password
     ############################################################################
     def test_json_deserialize_changed_pass
-        new_entry = PasswordEntry.new
-        new_user = User.new "master_user", 1234, "12345678901234567890123456789012"
+        new_entry = EntryCrypto::PasswordEntry.new
+        new_user = EntryCrypto::User.new "master_user", 1234, "12345678901234567890123456789012"
 
         new_user.lock("fake_pass")
         new_user.unlock("fake_pass")

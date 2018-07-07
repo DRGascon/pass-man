@@ -8,6 +8,8 @@ require './utils/string'
 require './entry-crypto/user'
 require 'json'
 
+module EntryCrypto
+
 class PasswordEntry
 
     attr_accessor :site_name, :user_name, :salt
@@ -141,5 +143,7 @@ class PasswordEntry
         end
         result
     end
+
+end
 
 end
